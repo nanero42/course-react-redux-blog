@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
 import { emojies } from "src/consts";
 import { Emoji, State } from "src/interfaces";
 
@@ -15,6 +16,8 @@ export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 export interface PostsSlice {
   items: Post[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed',
+  error: any,
 }
 
 export type PatchPost = WithRequired<Post, 'id'>
@@ -25,19 +28,16 @@ export interface DeletePost {
   id: number;
 }
 
+const POSTS_URL = 'http://localhost:4000/posts';
+
+export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+  return (await axios.get(POSTS_URL)).data;
+})
+
 const initialState: PostsSlice = {
-  items: [
-    {
-      id: 0,
-      userId: '1234t5yu',
-      title: 'React',
-      content: 'Learn React',
-      date: new Date().toISOString(),
-      reactions: [
-        ...emojies,
-      ]
-    }
-  ],
+  items: [],
+  status: 'idle',
+  error: null,
 };
 
 export const postsSlice = createSlice({
@@ -98,11 +98,27 @@ export const postsSlice = createSlice({
         post.reactions[reactionId].count++;
         state.items.splice(postIndex, 1, post);
       }
-    }
+    },
+  },
+  extraReducers(builder) {
+    builder
+      .addCase(fetchPosts.pending, (state, action) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchPosts.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.items = state.items.concat(action.payload);
+      })
+      .addCase(fetchPosts.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
   }
 });
 
 export const getPosts = (state: State) => state.posts.items;
+export const getPostsStatus = (state: State) => state.posts.status;
+export const getPostsError = (state: State) => state.posts.error;
 
 export const {
   addPost,

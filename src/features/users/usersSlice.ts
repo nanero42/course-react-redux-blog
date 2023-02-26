@@ -6,12 +6,12 @@ export interface User {
   name: string;
 }
 
-export interface UsersSlice {
-  users: User[];
+export interface UsersState {
+  items: User[];
 }
 
-const initialState: UsersSlice = {
-  users: [
+const initialState: UsersState = {
+  items: [
     {
       id: '1234t5yu',
       name: 'Geralt',
@@ -35,4 +35,4 @@ export const usersSlice = createSlice({
 
 export const { reducer: usersReducer } = usersSlice;
 
-export const getUsers = (state: State) => state.users.users;
+export const getUsers = (state: State) => state.users.items;

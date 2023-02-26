@@ -1,15 +1,15 @@
 {
   "users": [
     {
-      "id": "1234t5yu",
+      "id": 0,
       "name": "Geralt"
     },
     {
-      "id": "e2rfgthy67u",
+      "id": 1,
       "name": "Yennefer"
     },
     {
-      "id": "vfgui7u6t5r",
+      "id": 2,
       "name": "Ciri"
     }
   ],

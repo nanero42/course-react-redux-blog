@@ -1,0 +1,21 @@
+.posts {
+
+  &__input {
+    display: block;
+    background-color: #FFF;
+    border: 1px solid #FFF;
+    border-radius: 6px;
+    padding: 10px;
+    cursor: default;
+  }
+
+  &__input:not(:last-child) {
+    margin-bottom: 12px;
+  }
+
+  &__input-editable {
+    cursor: default;
+    border: 1px solid #000;
+    cursor: text;
+  }
+}

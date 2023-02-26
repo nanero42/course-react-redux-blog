@@ -5,6 +5,7 @@ import { setStatesValue } from "src/utils";
 import { getUsers } from "../users/usersSlice";
 import "./posts.scss";
 import classNames from "classnames";
+import { Status } from "src/enums";
 
 export function Posts() {
   const dispatch = useDispatch();
@@ -22,7 +23,7 @@ export function Posts() {
   const canSave = !((authorId && title && content).trim());
 
   useEffect(() => {
-    if (postsStatus === 'idle') {
+    if (postsStatus === Status.idle) {
       dispatch(fetchPosts() as any);
     }
   }, [postsStatus, dispatch]);
@@ -40,9 +41,9 @@ export function Posts() {
 
   let template;
 
-  if (postsStatus === 'loading') {
+  if (postsStatus === Status.loading) {
     template = <p>Loading</p>;
-  } else if (postsStatus === 'succeeded') {
+  } else if (postsStatus === Status.succeeded) {
     template = sortedPosts.map(({ id: postId, userId, title, content, date, reactions }) => {
       return (
         <li key={postId}>
@@ -64,7 +65,7 @@ export function Posts() {
         </li>
       );
     })
-  } else if (postsStatus === 'failed') {
+  } else if (postsStatus === Status.failde) {
     template = <p>{postsError}</p>
   }
 

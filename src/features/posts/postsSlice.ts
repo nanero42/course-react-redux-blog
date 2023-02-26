@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { emojies } from "src/consts";
+import { Status } from "src/enums";
 import { Emoji, State } from "src/interfaces";
 
 export interface Post {
@@ -16,7 +17,7 @@ export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 export interface PostsSlice {
   items: Post[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed',
+  status: Status,
   error: any,
 }
 
@@ -36,7 +37,7 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
 
 const initialState: PostsSlice = {
   items: [],
-  status: 'idle',
+  status: Status.idle,
   error: null,
 };
 
@@ -101,16 +102,19 @@ export const postsSlice = createSlice({
     },
   },
   extraReducers(builder) {
+    // link promise statuses with redux statuses
+    // promise: pending | fulfilled | rejected
+    // redux: idle | loading | secceeded | failed 
     builder
       .addCase(fetchPosts.pending, (state, action) => {
-        state.status = 'loading';
+        state.status = Status.loading;
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.items = state.items.concat(action.payload);
+        state.status = Status.succeeded;
+        state.items = action.payload;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = Status.failde;
         state.error = action.error.message;
       })
   }

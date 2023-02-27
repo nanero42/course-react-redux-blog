@@ -33,7 +33,7 @@ export function Posts() {
   return (
     <div className="posts">
       <div className="posts__inputs">
-        <select name="authors" onChange={(e) => setAuthorId(e.target.value)}>
+        <select name="authors" value={authorId} onChange={(e) => setAuthorId(e.target.value)}>
           <option value="">Select author</option>
           {authors.map(({ id, name }) => {
             return <option key={id} value={id}>{name}</option>

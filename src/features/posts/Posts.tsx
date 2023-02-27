@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { deletePost, getPosts, addPost, incrementReaction, fetchPosts, getPostsStatus, getPostsError } from "./postsSlice";
 import { useEffect, useState } from "react";
 import { setStatesValue } from "src/utils";
-import { fetchUsers, getUsers, getUsersError, getUsersStatus } from "../users/usersSlice";
+import { fetchUsers, getUsers, getUsersStatus } from "../users/usersSlice";
 import "./posts.scss";
 import classNames from "classnames";
 import { Status } from "src/enums";

@@ -16,7 +16,6 @@ export function Posts() {
 
   const authors = useSelector(getUsers);
   const authorsStatus = useSelector(getUsersStatus);
-  const authorsError = useSelector(getUsersError);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');

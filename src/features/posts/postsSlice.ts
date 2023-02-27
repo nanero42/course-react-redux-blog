@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
 import { emojies } from "src/consts";
+import { Status } from "src/enums";
 import { Emoji, State } from "src/interfaces";
 
 export interface Post {
@@ -13,31 +15,30 @@ export interface Post {
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
-export interface PostsSlice {
+export interface PostsState {
   items: Post[];
+  status: Status;
+  error: any;
 }
 
 export type PatchPost = WithRequired<Post, 'id'>
 
 export interface AddPost extends Post{}
 
+const POSTS_URL = 'http://localhost:4000/posts';
+
+export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+  return (await axios.get(POSTS_URL)).data;
+})
+
 export interface DeletePost {
   id: number;
 }
 
-const initialState: PostsSlice = {
-  items: [
-    {
-      id: 0,
-      userId: '1234t5yu',
-      title: 'React',
-      content: 'Learn React',
-      date: new Date().toISOString(),
-      reactions: [
-        ...emojies,
-      ]
-    }
-  ],
+const initialState: PostsState = {
+  items: [],
+  status: Status.idle,
+  error: null,
 };
 
 export const postsSlice = createSlice({
@@ -99,10 +100,26 @@ export const postsSlice = createSlice({
         state.items.splice(postIndex, 1, post);
       }
     }
-  }
+  },
+  extraReducers(builder) {
+    builder
+      .addCase(fetchPosts.pending, (state, action) => {
+        state.status = Status.loading;
+      })
+      .addCase(fetchPosts.fulfilled, (state, action) => {
+        state.status = Status.succeeded;
+        state.items = action.payload;
+      })
+      .addCase(fetchPosts.rejected, (state, action) => {
+        state.status = Status.failed;
+        state.error = action.error.message;
+      })
+  },
 });
 
 export const getPosts = (state: State) => state.posts.items;
+export const getPostsStatus = (state: State) => state.posts.status;
+export const getPostsError = (state: State) => state.posts.error;
 
 export const {
   addPost,

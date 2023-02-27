@@ -1,21 +1,31 @@
 import { useDispatch, useSelector } from "react-redux";
-import { deletePost, getPosts, addPost, incrementReaction } from "./postsSlice";
-import { useState } from "react";
+import { deletePost, getPosts, addPost, incrementReaction, fetchPosts, getPostsStatus, getPostsError } from "./postsSlice";
+import { useEffect, useState } from "react";
 import { setStatesValue } from "src/utils";
 import { getUsers } from "../users/usersSlice";
 import "./posts.scss";
 import classNames from "classnames";
+import { Status } from "src/enums";
 
 export function Posts() {
   const dispatch = useDispatch();
 
   const posts = useSelector(getPosts);
+  const postsStatus = useSelector(getPostsStatus);
+  const postsError = useSelector(getPostsError);
+
   const authors = useSelector(getUsers);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [authorId, setAuthorId] = useState('');
   const [isEditable, setIsEditable] = useState(false);
+
+  useEffect(() => {
+    if (postsStatus === Status.idle) {
+      dispatch(fetchPosts() as any);
+    }
+  }, [postsStatus, dispatch]);
 
   const canSave = !((authorId && title && content).trim());
 
@@ -29,6 +39,36 @@ export function Posts() {
   const onEditable = () => setIsEditable(!isEditable);
 
   const sortedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date));
+
+  let template;
+
+  if (postsStatus === Status.loading) {
+    template = <p>Loading...</p>
+  } else if (postsStatus === Status.succeeded) {
+    template = sortedPosts.map(({ id: postId, userId, title, content, date, reactions }) => {
+      return (
+        <li key={postId}>
+          <div>
+            {authors.find((a) => a.id === userId ? a.name : null)?.name || 'Unknown user'}
+          </div>
+          <div>{date}</div>
+          <input className={classNames('posts__input', {'posts__input-editable': isEditable})} type="text" value={title} disabled={!isEditable}/>
+          <input className={classNames('posts__input', {'posts__input-editable': isEditable})} type="text" value={content} disabled={!isEditable}/>
+          <button onClick={onEditable}>{isEditable ? 'cancel' : 'patch'}</button>
+          {isEditable && <button>Save</button>}
+          <button onClick={() => dispatch(deletePost(postId))}>delete</button>
+          {reactions.map(({ id, name, value, count }) => {
+            return <div key={id} onClick={() => dispatch(incrementReaction({ postId: postId, reactionId: id}))}>
+              <button>{value}</button>
+              <span>{count}</span>
+            </div>
+          })}
+        </li>
+      );
+    })
+  } else if (postsStatus === Status.failed) {
+    template = <p>{postsError}</p>
+  }
 
   return (
     <div className="posts">
@@ -48,27 +88,7 @@ export function Posts() {
         <button onClick={onAddPost} disabled={canSave}>Add post</button>
       </div>
       <ul className="posts__list">
-        {sortedPosts.map(({ id: postId, userId, title, content, date, reactions }) => {
-            return (
-              <li key={postId}>
-                <div>
-                  {authors.find((a) => a.id === userId ? a.name : null)?.name || 'Unknown user'}
-                </div>
-                <div>{date}</div>
-                <input className={classNames('posts__input', {'posts__input-editable': isEditable})} type="text" value={title} disabled={!isEditable}/>
-                <input className={classNames('posts__input', {'posts__input-editable': isEditable})} type="text" value={content} disabled={!isEditable}/>
-                <button onClick={onEditable}>{isEditable ? 'cancel' : 'patch'}</button>
-                {isEditable && <button>Save</button>}
-                <button onClick={() => dispatch(deletePost(postId))}>delete</button>
-                {reactions.map(({ id, name, value, count }) => {
-                  return <div key={id} onClick={() => dispatch(incrementReaction({ postId: postId, reactionId: id}))}>
-                    <button>{value}</button>
-                    <span>{count}</span>
-                  </div>
-                })}
-              </li>
-            );
-          })}
+        {template}
       </ul>
     </div>
   );

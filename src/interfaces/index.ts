@@ -1,8 +1,8 @@
-import { PostsSlice } from "src/features/posts/postsSlice";
+import { PostsState } from "src/features/posts/postsSlice";
 import { UsersSlice } from "src/features/users/usersSlice";
 
 export interface State {
-  posts: PostsSlice,
+  posts: PostsState,
   users: UsersSlice,
 }
 

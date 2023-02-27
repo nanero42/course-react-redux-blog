@@ -1,9 +1,9 @@
 import { PostsState } from "src/features/posts/postsSlice";
-import { UsersSlice } from "src/features/users/usersSlice";
+import { UsersState } from "src/features/users/usersSlice";
 
 export interface State {
   posts: PostsState,
-  users: UsersSlice,
+  users: UsersState,
 }
 
 export interface Emoji {

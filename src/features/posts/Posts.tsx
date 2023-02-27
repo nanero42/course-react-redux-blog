@@ -22,6 +22,12 @@ export function Posts() {
   const [isEditable, setIsEditable] = useState(false);
 
   useEffect(() => {
+    window.addEventListener('offline', () => {
+      alert('you\'re offline!');
+    });
+  }, []);
+
+  useEffect(() => {
     if (postsStatus === Status.idle) {
       dispatch(fetchPosts() as any);
     }

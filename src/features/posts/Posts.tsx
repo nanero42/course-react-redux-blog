@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { deletePost, getPosts, addPost, incrementReaction, fetchPosts, getPostsStatus, getPostsError } from "./postsSlice";
 import { useEffect, useState } from "react";
 import { setStatesValue } from "src/utils";
-import { getUsers } from "../users/usersSlice";
+import { fetchUsers, getUsers, getUsersError, getUsersStatus } from "../users/usersSlice";
 import "./posts.scss";
 import classNames from "classnames";
 import { Status } from "src/enums";
@@ -15,6 +15,8 @@ export function Posts() {
   const postsError = useSelector(getPostsError);
 
   const authors = useSelector(getUsers);
+  const authorsStatus = useSelector(getUsersStatus);
+  const authorsError = useSelector(getUsersError);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -32,6 +34,12 @@ export function Posts() {
       dispatch(fetchPosts() as any);
     }
   }, [postsStatus, dispatch]);
+
+  useEffect(() => {
+    if (authorsStatus === Status.idle) {
+      dispatch(fetchUsers() as any);
+    }
+  }, [authorsStatus, dispatch]);
 
   const canSave = !((authorId && title && content).trim());
 

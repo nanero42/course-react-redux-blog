@@ -29,6 +29,10 @@ const POSTS_URL = 'http://localhost:4000/posts';
 
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   return (await axios.get(POSTS_URL)).data;
+});
+
+export const addNewPost = createAsyncThunk('posts/addNewPost', async (body: Post) => {
+  return await axios.post(POSTS_URL, body);
 })
 
 export interface DeletePost {
@@ -103,6 +107,7 @@ export const postsSlice = createSlice({
   },
   extraReducers(builder) {
     builder
+      // GET
       .addCase(fetchPosts.pending, (state, action) => {
         state.status = Status.loading;
       })
@@ -111,6 +116,19 @@ export const postsSlice = createSlice({
         state.items = action.payload;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
+        state.status = Status.failed;
+        state.error = action.error.message;
+      })
+      // POST
+      .addCase(addNewPost.pending, (state, action) => {
+        state.status = Status.loading;
+      })
+      .addCase(addNewPost.fulfilled, (state, action: any) => {
+        state.status = Status.succeeded;
+        console.log(action);
+        state.items.push(action.payload);
+      })
+      .addCase(addNewPost.rejected, (state, action) => {
         state.status = Status.failed;
         state.error = action.error.message;
       })

@@ -6,6 +6,7 @@ import { fetchUsers, getUsers, getUsersStatus } from "../users/usersSlice";
 import "./posts.scss";
 import classNames from "classnames";
 import { Status } from "src/enums";
+import axios from "axios";
 
 export function Posts() {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ export function Posts() {
   const [content, setContent] = useState('');
   const [authorId, setAuthorId] = useState('');
   const [isEditable, setIsEditable] = useState(false);
+  const [requestStatus, setRequestStatus] = useState(Status.idle);
 
   useEffect(() => {
     window.addEventListener('offline', () => {
@@ -40,13 +42,20 @@ export function Posts() {
     }
   }, [authorsStatus, dispatch]);
 
-  const canSave = !((authorId && title && content).trim());
+  const canSave = ([authorId, title.trim(), content.trim()].every(Boolean) && requestStatus === Status.idle);
 
   const onAddPost = () => {
-    if ((title && content).trim()) {
-      dispatch(addPost(authorId, title, content));
+    if (canSave) {
+      try {
+        setRequestStatus(Status.loading);
+        dispatch(addPost(authorId, title, content));
+        setStatesValue([setTitle, setContent, setAuthorId], '');
+      } catch (e) {
+        console.log('error while adding post: ', e);
+      } finally {
+        setRequestStatus(Status.idle);
+      }
     }
-    setStatesValue([setTitle, setContent, setAuthorId], '');
   }
 
   const onEditable = () => setIsEditable(!isEditable);
@@ -83,6 +92,41 @@ export function Posts() {
     template = <p>{postsError}</p>
   }
 
+  // axios.post('http://localhost:4000/posts', {id: 1, title: 'adsd', userId: 0, content: 'asdadsadasdasdadad', "date": "2023-02-26T14:56:17.890Z",
+  // "reactions": [
+  //   {
+  //     "id": 0,
+  //     "name": "thumbsUp",
+  //     "value": "👍",
+  //     "count": 0
+  //   },
+  //   {
+  //     "id": 1,
+  //     "name": "wow",
+  //     "value": "😮",
+  //     "count": 0
+  //   },
+  //   {
+  //     "id": 2,
+  //     "name": "heart",
+  //     "value": "❤️",
+  //     "count": 0
+  //   },
+  //   {
+  //     "id": 3,
+  //     "name": "rocket",
+  //     "value": "🚀",
+  //     "count": 0
+  //   },
+  //   {
+  //     "id": 4,
+  //     "name": "coffee",
+  //     "value": "☕",
+  //     "count": 0
+  //   }
+  // ]})
+  //   .then((resp) => console.log(resp));
+
   return (
     <div className="posts">
       <div className="posts__inputs">
@@ -98,7 +142,7 @@ export function Posts() {
         <div>
           <input type="text" placeholder="content" value={content} onChange={(e) => setContent(e.target.value)}/>
         </div>
-        <button onClick={onAddPost} disabled={canSave}>Add post</button>
+        <button onClick={onAddPost} disabled={!canSave}>Add post</button>
       </div>
       <ul className="posts__list">
         {template}
